@@ -3,29 +3,29 @@
 # --- Functions ---
 
 # Gathers file contents, respecting .gitignore
+# Gathers file contents, respecting .gitignore
 gather_file_context() {
     # 1. Use `git ls-files` to get all relevant files.
     #    -c = cached (files Git knows about)
     #    -o = others (untracked files)
     #    --exclude-standard = respect .gitignore
-    # This is a robust way to get all non-ignored files.
-    local file_list
-    file_list=$(git ls-files -c -o --exclude-standard)
-    
-    # Loop through the filtered list
-    while IFS= read -r file; do
-        # 2. Check MIME type to ensure it's text
-        #    We add -L to follow symlinks, just in case.
-        local mime_type
-        mime_type=$(file -L --mime-type -b "$file")
+    #
+    # 2. Pipe the list directly into the `while` loop.
+    #    This is more efficient than storing it in a variable.
+    git ls-files -c -o --exclude-standard | while IFS= read -r file; do
+        # 3. Check the file's encoding.
+        local encoding
+        encoding=$(file -L --mime-encoding -b "$file")
         
-        # 3. Check if the mime_type string starts with "text/"
-        if [[ "$mime_type" == text/* ]]; then
+        # 4. If the encoding is NOT binary, we can safely print it.
+        #    This is a "deny-list" approach, which is far more robust
+        #    than trying to "allow-list" all possible text types.
+        if [[ "$encoding" != "binary" ]]; then
             echo "======== FILE: $file ========"
             cat "$file"
             echo
         fi
-    done <<< "$file_list"
+    done
 }
 
 # Gathers Git information and prints it to standard output
