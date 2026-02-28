@@ -21,9 +21,9 @@ gather_file_context() {
         #    This is a "deny-list" approach, which is far more robust
         #    than trying to "allow-list" all possible text types.
         if [[ "$encoding" != "binary" ]]; then
-            echo "======== FILE: $file ========"
+            echo "<file path=\"$file\">"
             cat "$file"
-            echo
+            echo "</file>"
         fi
     done
 }
