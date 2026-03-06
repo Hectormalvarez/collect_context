@@ -21,9 +21,11 @@ gather_file_context() {
         #    This is a "deny-list" approach, which is far more robust
         #    than trying to "allow-list" all possible text types.
         if [[ "$encoding" != "binary" ]]; then
-            echo "<file path=\"$file\">"
+            echo "### File: \`$file\`"
+            echo '```'
             cat "$file"
-            echo "</file>"
+            echo '```'
+            echo
         fi
     done
 }
@@ -36,20 +38,28 @@ gather_git_context() {
         return
     fi
     
-    echo "======== GIT STATUS (SHORT) ========"
+    echo "### Git Status (Short)"
+    echo '```'
     git status --short
+    echo '```'
     echo
     
-    echo "======== GIT DIFF (UNSTAGED) ========"
+    echo "### Git Diff (Unstaged)"
+    echo '```'
     git --no-pager diff
+    echo '```'
     echo
     
-    echo "======== GIT DIFF (STAGED) ========"
+    echo "### Git Diff (Staged)"
+    echo '```'
     git --no-pager diff --staged
+    echo '```'
     echo
     
-    echo "======== GIT LOG (LAST 5) ========"
+    echo "### Git Log (Last 5)"
+    echo '```'
     git --no-pager log -n 5 --oneline
+    echo '```'
     echo
 }
 
