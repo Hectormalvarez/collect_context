@@ -3,7 +3,6 @@
 # --- Functions ---
 
 # Gathers file contents, respecting .gitignore
-# Gathers file contents, respecting .gitignore
 gather_file_context() {
     # 1. Use `git ls-files` to get all relevant files.
     #    -c = cached (files Git knows about)
@@ -13,17 +12,27 @@ gather_file_context() {
     # 2. Pipe the list directly into the `while` loop.
     #    This is more efficient than storing it in a variable.
     git ls-files -c -o --exclude-standard | while IFS= read -r file; do
-        # 3. Check the file's encoding.
+        # 3. Filter token-heavy text files using a case statement
+        case "$file" in
+            *lock.json|*.lock|*-lock.yaml|*.min.js) continue ;;
+        esac
+        
+        # 4. Check the file's encoding.
         local encoding
         encoding=$(file -L --mime-encoding -b "$file")
         
-        # 4. If the encoding is NOT binary, we can safely print it.
+        # 5. If the encoding is NOT binary, we can safely print it.
         #    This is a "deny-list" approach, which is far more robust
         #    than trying to "allow-list" all possible text types.
         if [[ "$encoding" != "binary" ]]; then
             echo "### File: \`$file\`"
-            echo '```'
-            cat "$file"
+            # 6. Extract extension efficiently using short-circuit evaluation
+            local ext="${file##*.}"
+            [[ "$ext" == "$file" ]] && ext=""
+            # 7. Add syntax highlighting hints
+            echo '```'"$ext"
+            # 8. Prevent markdown syntax breakage by ensuring trailing newline
+            awk 1 "$file"
             echo '```'
             echo
         fi
