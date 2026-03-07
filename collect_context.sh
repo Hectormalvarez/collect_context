@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # --- Functions ---
+
+# Checks for required dependencies and exits if any are missing
+check_dependencies() {
+    local deps=("git" "file" "awk")
+    
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            echo "Error: Required command '$dep' is not installed." >&2
+            exit 1
+        fi
+    done
+}
 
 # Gathers file contents, respecting .gitignore
 gather_file_context() {
@@ -74,6 +88,8 @@ gather_git_context() {
 
 # --- Main Logic ---
 main() {
+    check_dependencies
+    
     echo "Gathering project context..." >&2
 
     # Gather all context and print it to standard output
